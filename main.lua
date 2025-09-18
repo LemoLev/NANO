@@ -6,15 +6,16 @@
 --- PREFIX: nanoj
 ----------------------------------------------
 ------------MOD CODE -------------------------
+-- Script variables
+frameCounter = 0
+blindCounter = 0
+-- Script functions
 function get_self_index(find, from)
 	local ind = nil
 	for i = 1, #from do
 		if from[i] == find then
 			ind = i
 		end
-	end
-	if not ind then
-		print('Card not found')
 	end
 	return ind
 end
@@ -83,6 +84,7 @@ function done_with_NANO(ctd)
 	nano_jok:add_to_deck()
 	G.jokers:emplace(nano_jok)
 end
+
 -- Jokers atlas
 SMODS.Atlas{
 	key = 'Jokers',
@@ -90,6 +92,7 @@ SMODS.Atlas{
 	px = 71,
 	py = 95
 }
+
 -- Tarots atlas
 SMODS.Atlas{
 	key = 'Tarots',
@@ -97,6 +100,7 @@ SMODS.Atlas{
 	px = 71,
 	py = 95
 }
+
 -- Letters atlas
 SMODS.Atlas{
 	key = 'Letters',
@@ -104,59 +108,64 @@ SMODS.Atlas{
 	px = 9,
 	py = 14
 }
+
 -- Smoking (shader)
 SMODS.Shader{
 	key = 'smoking',
 	path = 'smoking.fs'
 }
+
 -- Burnt (shader)
 SMODS.Shader{
 	key = 'burnt',
 	path = 'burnt.fs'
 }
+
 -- Explosion
 SMODS.Sound{
 	key = 'explosion',
 	path = 'explosion.ogg',
 	volume = 1.5
 }
+
 -- N (Sound)
 SMODS.Sound{
 	key = 'snd_n',
 	path = 'snd_n.ogg'
 }
--- N2 (Sound)
-SMODS.Sound{
-	key = 'snd_n2',
-	path = 'snd_n.ogg'
-}
+
 -- A (Sound)
 SMODS.Sound{
 	key = 'snd_a',
 	path = 'snd_a.ogg'
 }
+
 -- O (Sound)
 SMODS.Sound{
 	key = 'snd_o',
 	path = 'snd_o.ogg'
 }
+
 -- Extinguisher Sound Effect
 SMODS.Sound{
 	key = 'exting',
 	path = 'ext_sfx.ogg',
 	volume = 0.8
 }
+
 -- Short circuit
 SMODS.Sound{
 	key = 'short_circuit',
 	path = 'short_circuit.ogg',
 	pitch = 1.3
 }
+
 -- Fire whoosh
 SMODS.Sound{
 	key = 'fire',
 	path = 'fire.ogg'
 }
+
 -- Match
 SMODS.Consumable{
 	key = 'match',
@@ -187,6 +196,7 @@ SMODS.Consumable{
 		return #highlighted > self.config.cardLimit
 	end
 }
+
 -- Extinguisher
 SMODS.Consumable{
 	key = 'exting',
@@ -220,6 +230,8 @@ SMODS.Consumable{
 		return #highlighted == 1
 	end
 }
+
+
 -- Burnt (Edition)
 SMODS.Edition{
 	key = 'burnt',
@@ -267,6 +279,7 @@ SMODS.Edition{
 		end
 	end
 }
+
 -- Smoking (Edition)
 SMODS.Edition{
 	key = 'smoking',
@@ -278,12 +291,16 @@ SMODS.Edition{
 		label = 'Smoking',
 		text = {
 			'{X:mult,C:white}X#1#{} Mult every 9 frames.',
-			'Appliable only to {B:1,C:white}Arduino NANO{}'
+			'Appliable only to {B:1,C:white}Arduino NANO{}',
+			'If not dealt with', 'in {C:green}#2# blinds{},',
+			'explode and make',
+			'the neighboring cards burnt'
 		}
 	},
 	loc_vars = function(self, info_queue, center)
 		return {vars = {
 			self.config.x_mult, 
+			blindCounter,
 			colours = {G.C.BLUE}
 		} }
 	end,
@@ -294,9 +311,8 @@ SMODS.Edition{
 	badge_colour = G.C.GREY,
 	sound = { sound = 'nanoj_short_circuit' }
 }
--- Script variables
-frameCounter = 0
-blindCounter = 0
+
+
 -- Arduino NANO
 SMODS.Joker{
 	key = 'arnano',
@@ -306,7 +322,7 @@ SMODS.Joker{
 			'{X:mult,C:white}X#1#{} Mult.',
 			'After each hand played,',
 			'{C:green}#2# in #3#{} chance', 
-			'to start {C:attention}Smoking{}'
+			'to start {C:attention}Smoking{}',
 		}
 	},
 	unlocked = true, --where it is unlocked or not: if true, 
@@ -432,7 +448,7 @@ SMODS.Joker{
 				if G.jokers.cards[i] == card then
 					if not G.jokers.cards[i-1] then return { mult = card.ability.extraMult } end
 					if G.jokers.cards[i-1].edition and (G.jokers.cards[i-1].edition.key == 'e_nanoj_burnt' or G.jokers.cards[i-1].edition.key == 'e_nanoj_smoking') then
-						G.jokers.cards[i-1]:set_edition(nil, true, false)
+						G.jokers.cards[i-1]:set_edition(nil, false, false)
 						return {
 							message = "Extinguished!",
 							message_card = G.jokers.cards[i],
@@ -441,7 +457,7 @@ SMODS.Joker{
 						}
 					end
 					if G.jokers.cards[i].edition and (G.jokers.cards[i].edition.key == 'e_nanoj_burnt' or G.jokers.cards[i].edition.key == 'e_nanoj_smoking') then
-						G.jokers.cards[i]:set_edition(nil, true, false)
+						G.jokers.cards[i]:set_edition(nil, false, false)
 						return {
 							message = "Extinguished!",
 							mult = card.ability.extraMult,
@@ -476,30 +492,34 @@ SMODS.Joker{
 			'After each hand played,',
 			'Saves all {C:attention}Jokers{} held in hand',
 			'from burning or smoking,',
-			'and gives +#1# mult when done.',
+			'and gives {C:mult}+#1#{} mult per {C:attention}Joker{} saved.',
 			'Becomes {C:dark_edition}Eternal{} after',
 			'the first extinguish'
 		}
 	},
 	calculate = function(self, card, context)
 		if context.final_scoring_step then
+			local saved = {}
 			for i = 1, #G.jokers.cards do
 				if G.jokers.cards[i].edition and (G.jokers.cards[i].edition.key == 'e_nanoj_burnt' or G.jokers.cards[i].edition.key == 'e_nanoj_smoking') then
-					G.jokers.cards[i]:set_edition(nil, true, false)
+					saved[#saved + 1] = G.jokers.cards[i]
+					G.jokers.cards[i]:set_edition(nil, false, false)
 					if not card.ability.eternal then
 						card:set_eternal(true)
 					end
-					return {
-						message = "Extinguished!",
-						message_card = G.jokers.cards[i],
-						mult = card.ability.extraMult,
-						sound = "nanoj_exting"
-					}
 				end
+			end
+			if #saved > 0 then
+				return {
+					message = "Extinguished! x" .. #saved,
+					mult = card.ability.extraMult*#saved,
+					sound = "nanoj_exting"
+				}
 			end
 		end
 	end
 }
+
 -- N (Joker)
 SMODS.Joker{
 	key = 'lett_n',
@@ -557,6 +577,13 @@ SMODS.Joker{
 				end
 			end
 		end
+	end,
+	update = function(self, card, dt)
+		if not card.edition then
+			card:set_edition('e_negative', true, true)
+		elseif card.edition.type ~= 'negative' then
+			card:set_edition('e_negative', true, true)
+		end
 	end
 }
 
@@ -601,8 +628,6 @@ SMODS.Joker{
 					mult = card.ability.mult,
 				}
 			else 
-				print(prev_card.ability.i_am)
-				print(not prev_card.ability.has_before)
 				return {
 					message = 'Not yet!',
 					message_card = card,
@@ -611,8 +636,16 @@ SMODS.Joker{
 				}
 			end
 		end
+	end,
+	update = function(self, card, dt)
+		if not card.edition then
+			card:set_edition('e_negative', true, true)
+		elseif card.edition.type ~= 'negative' then
+			card:set_edition('e_negative', true, true)
+		end
 	end
 }
+
 -- O (Joker)
 SMODS.Joker{
 	key = 'lett_o',
@@ -666,6 +699,13 @@ SMODS.Joker{
 					mult = card.ability.mult,
 				}
 			end
+		end
+	end,
+	update = function(self, card, dt)
+		if not card.edition then
+			card:set_edition('e_negative', true, true)
+		elseif card.edition.type ~= 'negative' then
+			card:set_edition('e_negative', true, true)
 		end
 	end
 }
