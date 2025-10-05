@@ -101,6 +101,24 @@ SMODS.Atlas{
 	py = 95
 }
 
+-- Decks atlas
+SMODS.Atlas{
+	key = 'Decks',
+	path = 'Decks.png',
+	px = 71,
+	py = 95
+}
+
+-- Blinds atlas
+SMODS.Atlas{
+	key = 'Blinds',
+	path = 'Blinds.png',
+	px = 34,
+	py = 34,
+	atlas_table = 'ANIMATION_ATLAS',
+	frames = 21
+}
+
 -- Letters atlas
 SMODS.Atlas{
 	key = 'Letters',
@@ -164,6 +182,70 @@ SMODS.Sound{
 SMODS.Sound{
 	key = 'fire',
 	path = 'fire.ogg'
+}
+
+-- Pebble Deck
+SMODS.Back{ --idk why is it called back lol
+	key = 'pebble',
+	atlas = 'Decks',
+	loc_txt = { 
+		name = "Pebble Deck",
+		text = {
+			"its all stones,",
+			"ITS ALL FUCKING STONES"
+		}
+	},
+	pos = { x = 0, y = 0 },
+	apply = function(self, back)
+		G.E_MANAGER:add_event(Event({
+            func = function()
+                for k, v in pairs(G.playing_cards) do
+                    v:set_ability(G.P_CENTERS["m_stone"])
+                end
+            return true
+            end
+        }))
+	end
+}
+
+-- Phobos
+SMODS.Blind{
+	key = 'phobos',
+	loc_txt = {
+		name = 'Phobos',
+		text = {'All enhanced cards are debuffed'}
+	},
+	recalc_debuff = function(self, card, from_blind)
+		if(card.ability.set == "Enhanced") then
+			return true
+		else
+			return false
+		end
+	end,
+	atlas = "Blinds",
+	pos = {x=0,y=0},
+	boss = {min = 0, max = 2000},
+	boss_colour = HEX('272B66')
+}
+
+-- Deimos
+SMODS.Blind{
+	key = 'deimos',
+	loc_txt = {
+		name = 'Deimos',
+		text = {'All non-enhanced cards are debuffed'}
+	},
+	recalc_debuff = function(self, card, from_blind)
+		if(card.ability.set == "Enhanced") then
+			return false
+		else
+			return true
+		end
+	end,
+	atlas = "Blinds",
+	pos = {x=0,y=1},
+	boss = {min = 0, max = 2000},
+	boss_colour = HEX('CEC240')
 }
 
 -- Match
@@ -560,7 +642,7 @@ SMODS.Joker{
 					mult = card.ability.mult,
 				}
 			else
-				if G.jokers.cards[get_self_index(card, G.jokers.cards)+1].ability.i_am == 'A' then
+				if G.jokers.cards[get_self_index(card, G.jokers.cards)+1] and G.jokers.cards[get_self_index(card, G.jokers.cards)+1].ability.i_am == 'A' then
 					return {
 						message = 'N!',
 						message_card = card,
