@@ -33,3 +33,13 @@ Extinguishes the card selected (removes Burnt).
 
 ### 2. Match
 Makes the selected card Burnt.
+
+## Decks
+### 1. Pebble Deck
+ITS ALL STONE
+
+## Blinds
+### 1. Phobos
+All enhanced cards are debuffed
+### 1. Deimos
+All non-enhanced cards are debuffed
