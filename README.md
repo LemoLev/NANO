@@ -2,7 +2,7 @@
 It requires Steamodded and Lovely _(lovely is required by steamodded)_ to install
 
 How to install:
-Follow the tutorial [here](https://github.com/Steamopollys/Steamodded/wiki), download the _Source code (zip)_ option on the latest release of the mod, and extract the contents of the zip archive into its own folder (the file structure should look like this: .../Mods/NANO/<mod files>, not .../Mods/NANO/NANO/<mod files> nor .../Mods/<mod files>)
+Follow the tutorial [here](https://github.com/Steamopollys/Steamodded/wiki), download the _Source code (zip)_ option on the latest release of the mod, and extract the contents of the zip archive into its own folder (the file structure should look like this: `.../Mods/NANO/<mod files>`, not `.../Mods/NANO/NANO/<mod files>` nor `.../Mods/<mod files>`)
 
 Additions (so far):
 ## Editions
